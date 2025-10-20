@@ -1,23 +1,24 @@
 using DynamicOrderingDemo.Data;
 using DynamicOrderingDemo.Entities;
 using DynamicOrderingDemo.Extensions;
-using Microsoft.EntityFrameworkCore;
+using DynamicOrderingDemo.Models;
 
 namespace DynamicOrderingDemo.Repositories;
 
 public class PersonRepository(ApplicationContext context)
 {
-    public async Task<IEnumerable<Person>> GetAllAsync(
-        string orderBy, 
-        bool orderAsc, 
-        int page, 
-        int pageSize)
+    public async Task<PaginatedList<Person>> GetAllAsync(PersonRequest request)
     {
         return await context
             .Set<Person>()
-            .OrderBy(orderBy, orderAsc)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
-            .ToListAsync();
+            .DynamicWhere(new
+            {
+                Id = request.Id, 
+                Name = request.Name,
+                Age = request.Age,
+                IsActive = true,
+            })
+            .DynamicOrderBy(request.OrderBy, request.OrderAsc)
+            .ToPaginatedListAsync(request.Page, request.PageSize);
     }
 }

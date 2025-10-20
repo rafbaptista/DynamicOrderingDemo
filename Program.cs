@@ -1,6 +1,9 @@
 using DynamicOrderingDemo.Data;
+using DynamicOrderingDemo.Entities;
+using DynamicOrderingDemo.Models;
 using DynamicOrderingDemo.Repositories;
 using DynamicOrderingDemo.Services;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,7 +28,7 @@ public class Program
         var provider = builder.Services.BuildServiceProvider();
         using var context = provider.GetService<ApplicationContext>();
         context.Database.EnsureCreated();
-        
+
         var app = builder.Build();
 
         // Configure the HTTP request pipeline.
@@ -40,12 +43,20 @@ public class Program
         app.UseAuthorization();
 
         app.MapGet("/person", async (
-                [FromServices] PersonService personService, 
-                 [FromQuery] string orderBy, 
-                 [FromQuery] bool orderAsc,
-                 [FromQuery] int page,
-                 [FromQuery] int pageSize
-                ) => await personService.GetAllAsync(orderBy, orderAsc, page, pageSize))
+                [FromServices] PersonService personService,
+                [FromQuery] string? orderBy,
+                [FromQuery] bool? orderAsc,
+                [FromQuery] int? page,
+                [FromQuery] int? pageSize,
+                [FromQuery] string? name,
+                [FromQuery] int? id,
+                [FromQuery] int? age,
+                [FromQuery] bool? isActive
+            ) =>
+            {
+                var request = new PersonRequest(orderBy, orderAsc, page, pageSize, name, id, age, isActive);
+                return await personService.GetAllAsync(request);
+            })
             .WithName("Get Person")
             .WithOpenApi();
 

@@ -1,9 +1,11 @@
 using DynamicOrderingDemo.Entities;
+using DynamicOrderingDemo.Models;
 using DynamicOrderingDemo.Repositories;
 
 namespace DynamicOrderingDemo.Services;
 
 public class PersonService(PersonRepository personRepository)
 {
-    public async Task<IEnumerable<Person>> GetAllAsync(string orderBy, bool orderAsc, int page, int pageSize) => await personRepository.GetAllAsync(orderBy, orderAsc, page, pageSize);
+    public async Task<PaginatedList<Person>> GetAllAsync(PersonRequest request) 
+        => await personRepository.GetAllAsync(request);
 }
